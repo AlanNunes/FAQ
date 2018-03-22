@@ -44,20 +44,38 @@
           </button>
         </div>
         <div class="modal-body">
-          <form>
+          <form class="needs-validation" novalidate>
             <div class="form-row">
                     <div class="form-group col-md-6">
                       <label for="nome">Nome:</label>
                       <input type="text" class="form-control" id="nome">
+                      <div class="valid-feedback">
+                        Nome coerente.
+                      </div>
+                      <div class="invalid-feedback">
+                        Este campo deve possuir no mínimo 4 caracteres.
+                      </div>
                     </div>
                     <div class="form-group col-md-6">
                       <label for="email">Email:</label>
                       <input type="email" class="form-control" id="email">
+                      <div class="valid-feedback">
+                        Email válido
+                      </div>
+                      <div class="invalid-feedback">
+                        Informe um e-mail válido.
+                      </div>
                     </div>
             </div>
             <div class="form-row">
               <label for="perguntaConteudo">Deixe sua pergunta:</label>
               <textarea class="form-control" id="perguntaConteudo" rows="4"></textarea>
+              <div class="valid-feedback">
+                Pergunta coerente.
+              </div>
+              <div class="invalid-feedback">
+                Sua pergunta deve ter no mínimo 10 caracteres.
+              </div>
             </div>
           </form>
         </div>
@@ -110,15 +128,37 @@
         data = $(this).serialize() + "&" + $.param(data);
         $.ajax({
           type: "POST",
-          dataType: "html",
+          dataType: "json",
           url: "php/Controll.php",
           data: data,
           success: function(data) {
-            if(data){
+            alert(data.erroEmail);
+            if(!data.erro){
               $("#fazerPergunta").modal('hide');
               $("#mensagemSucesso").modal('show');
             }else{
               // Erro
+              if(data.erroNome){
+                $("#nome").removeClass("is-valid");
+                $("#nome").addClass("is-invalid");
+              }else{
+                $("#nome").removeClass("is-invalid");
+                $("#nome").addClass("is-valid");
+              }
+              if(data.erroEmail){
+                $("#email").removeClass("is-valid");
+                $("#email").addClass("is-invalid");
+              }else{
+                $("#email").removeClass("is-invalid");
+                $("#email").addClass("is-valid");
+              }
+              if(data.erroConteudo){
+                $("#perguntaConteudo").removeClass("is-valid");
+                $("#perguntaConteudo").addClass("is-invalid");
+              }else{
+                $("#perguntaConteudo").removeClass("is-invalid");
+                $("#perguntaConteudo").addClass("is-valid");
+              }
             }
           }
         });

@@ -28,6 +28,14 @@ if(isset($_POST["process"]) && !empty($_POST["process"])) {
 			registrarPergunta();
 			break;
 
+		case 'listPerguntas':
+			listPerguntas();
+			break;
+
+		case 'contribuirFAQ':
+			contribuirFAQ();
+			break;
+
 		default:
 			echo "ERROR 404 - Process Not Found";
 			break;
@@ -50,22 +58,93 @@ if(isset($_POST["process"]) && !empty($_POST["process"])) {
 // 	echo $responseAnswer;
 // }
 
-function registrarPergunta(){
-	$nome = safe_data($_POST["nome"]);
-	$email = safe_data($_POST["email"]);
-	$conteudo = safe_data($_POST["conteudo"]);
+function contribuirFAQ(){
+	if(!empty($_POST["categoria"]) && isset($_POST["categoria"]) && !empty($_POST["pergunta"]) && isset($_POST["pergunta"]) && !empty($_POST["resposta"]) && isset($_POST["resposta"])){
+		$categoria = safe_data($_POST["categoria"]);
+		$pergunta = safe_data($_POST["pergunta"]);
+		$resposta = safe_data($_POST["resposta"]);
+		$nome = safe_data($_SESSION["nome"]);
+		$email = safe_data($_SESSION["email"]);
 
+		$db = new DataBase();
+		$conn = $db->getConnection();
+
+		$faq = new FAQ($conn);
+		$response = $faq->contribuirFAQ($categoria, $pergunta, $resposta, $nome, $email);
+		if($response == -1){
+			// Erro Interno
+			echo -2;
+		}else{
+			// Success
+			echo 1;
+		}
+	}else{
+		// Erro, não preencheu os dados
+		echo -1;
+	}
+}
+
+function listPerguntas(){
 	$db = new DataBase();
 	$conn = $db->getConnection();
 
 	$pergunta = new Perguntas($conn);
-	if($pergunta->registrarPergunta($nome, $email, $conteudo)){
-		// Process completed without any erro
-		echo true;
-	}else{
-		// Something cause an erro
-		echo false;
+	$response = $pergunta->listPerguntasSemRespostas();
+
+	while($row = $response->fetch_assoc()){
+		echo "<p><div class='card text-center'>
+				  <div class='card-header'>
+				    ".$row["nome"]."/".$row["email"]."
+				  </div>
+				  <div class='card-body'>
+				    <h5 class='card-title'>Pergunta:</h5>
+				    <p class='card-text'>".$row["perguntaConteudo"]."</p>
+				    <a href='#' class='btn btn-primary'>Adicionar Resposta</a>
+				  </div>
+				  <div class='card-footer text-muted'>
+				    ".date('d/m/Y', strtotime(str_replace('-','/', $row["data"])))."
+				  </div>
+				</div></p>";
 	}
+}
+
+function registrarPergunta(){
+	$nome = safe_data($_POST["nome"]);
+	$email = safe_data($_POST["email"]);
+	$conteudo = safe_data($_POST["conteudo"]);
+	$erro = $erroNome = $erroEmail = $erroConteudo = false;
+	if(empty($nome) OR !isset($nome)){
+		$erro = true;
+		$erroNome = true;
+	}
+	if(empty($email) OR !isset($email) OR !filter_var($email, FILTER_VALIDATE_EMAIL)){
+		$erro = true;
+		$erroEmail = true;
+	}
+	if(empty($conteudo) OR !isset($conteudo)){
+		$erro = true;
+		$erroConteudo = true;
+	}
+
+	if($erro){
+		$response = array("erro" => true, "erroNome" => $erroNome, "erroEmail" => $erroEmail, "erroConteudo" => $erroConteudo);
+		echo json_encode($response);
+	}else{
+		$db = new DataBase();
+		$conn = $db->getConnection();
+
+		$pergunta = new Perguntas($conn);
+		if($pergunta->registrarPergunta($nome, $email, $conteudo)){
+			// Process completed without any erro
+			$response = array("erro" => false);
+			echo json_encode($response);
+		}else{
+			// Something cause an erro
+			$response = array("erro" => true);
+			echo json_encode($response);
+		}
+	}
+	
 }
 
 function buscaFAQ(){

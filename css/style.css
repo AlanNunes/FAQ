@@ -5,3 +5,13 @@
 .conteudo {
 	width: 70%;
 }
+
+.loginPainel {
+	padding: 50px;
+	margin-top: 50px;
+	width: 450px;
+	height: 400px;
+	border-radius: 5px;
+	background: #f4f4f4;
+}
+

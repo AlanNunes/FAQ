@@ -41,5 +41,25 @@ class FAQ {
 		}
 	}
 
+	public function contribuirFAQ($categoria, $pergunta, $resposta, $nome, $email){
+		$data = date('Y-m-d');
+		$sql = "INSERT INTO perguntas(perguntaConteudo, categoriaId, nome, email, data) VALUES ('$pergunta', '$categoria', '$nome', '$email', '$data')";
+		if($this->conn->query($sql)){
+			$perguntaId = $this->conn->insert_id;
+			$sql = "INSERT INTO respostas (respostaConteudo, nome, email, data) VALUES ('$resposta', '$nome', '$email', '$data')";
+			if($this->query($sql)){
+				$respostaId = $this->conn->insert_id;
+
+				$sql = "UPDATE perguntas SET respostaId = '$respostaId' WHERE perguntaId = '$perguntaId'";
+				if($this->conn->query($sql)){
+					// Success
+					return 0;
+				}
+			}
+		}
+		//Erro
+		return -1;
+	}
+
 }
 ?>

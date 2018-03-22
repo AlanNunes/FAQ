@@ -24,12 +24,18 @@ class Perguntas {
 	}
 
 	public function registrarPergunta($nome, $email, $conteudo){
-		$sql = "INSERT INTO perguntas (perguntaConteudo, nome, email) VALUES ('$conteudo', '$nome', '$email')";
+		$data = date("Y-m-d");
+		$sql = "INSERT INTO perguntas (perguntaConteudo, nome, email, data) VALUES ('$conteudo', '$nome', '$email', '$data')";
 		if($this->conn->query($sql)){
 			return true;
 		}else{
 			return false;
 		}
+	}
+
+	public function listPerguntasSemRespostas(){
+		$sql = "SELECT * FROM perguntas WHERE respostaId IS NULL ORDER BY data";
+		return $this->conn->query($sql);
 	}
 
 }
