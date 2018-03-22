@@ -3,7 +3,7 @@ class DataBase {
 	private $host = "localhost";
 	private $user = "root";
 	private $password = "";
-	private $dbName = "CleverBot";
+	private $dbName = "FAQ";
 	public $conn;
 
 	public function getConnection(){

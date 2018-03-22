@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="assets/icons/open-iconic-master/font/css/open-iconic-bootstrap.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <title>FAQ UGB/FERP</title>
+  </head>
+  <body>
+  <center>
+    <h1>Selecione uma Categoria</h1>
+
+    <div class="categorias">
+      <select class="form-control form-control-lg" id="categorias" onchange="buscaFAQ(this.value)">
+        <option value='-1' selected="true">Categorias</option>
+        <!-- This content is filled by the DataBase -->
+      </select>
+    </div>
+    <br/>
+    <div class="conteudo" id="conteudo">
+      <div id='accordion'>
+        <!-- This content is filled by the DataBase -->
+      </div>
+    </div>
+
+  </center>
+
+  <!-- Button trigger modal -->
+
+  <!-- Modal -->
+  <div class="modal fade" id="fazerPergunta" tabindex="-1" role="dialog" aria-labelledby="fazerPergunta" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fazerPerguntaTitulo">Deixe sua pergunta</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label for="nome">Nome:</label>
+                      <input type="text" class="form-control" id="nome">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label for="email">Email:</label>
+                      <input type="email" class="form-control" id="email">
+                    </div>
+            </div>
+            <div class="form-row">
+              <label for="perguntaConteudo">Deixe sua pergunta:</label>
+              <textarea class="form-control" id="perguntaConteudo" rows="4"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="enviarPergunta()">Enviar !</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="mensagemSucesso" tabindex="-1" role="dialog" aria-labelledby="mensagemLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mensagemLabel">FAQ</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Sua pergunta foi enviado com sucesso ! Em breve enviaremos a resposta ao seu email.<br/>
+        <p style="float: right">Grato.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Entendido !</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <script src="js/jquery.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+    $(document).ready(function(){
+      mostrarCategorias();
+    });
+
+    function enviarPergunta(){
+      var nome = $("#nome").val();
+      var email = $("#email").val();
+      var perguntaConteudo = $("#perguntaConteudo").val();
+
+      var data = {
+          "process": "registrarPergunta",
+          "nome": nome,
+          "email": email,
+          "conteudo": perguntaConteudo
+        };
+        data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "html",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            if(data){
+              $("#fazerPergunta").modal('hide');
+              $("#mensagemSucesso").modal('show');
+            }else{
+              // Erro
+            }
+          }
+        });
+    }
+
+    function buscaFAQ(categoriaId){
+      if( categoriaId != -1 ){
+        var data = {
+          "process": "buscaFAQ",
+          "categoriaId": categoriaId
+        };
+        data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "html",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            $("#accordion").html(data);
+            $("#accordion").append("<br/><br/><button type='button' class='btn btn-primary btn-lg btn-block' data-toggle='modal' data-target='#fazerPergunta'>Faça uma pergunta</button>");
+            console.log(data);
+          }
+        });
+      }
+    }
+
+      function mostrarCategorias(){
+        var data = {
+          "process": "mostrarCategorias"
+        };
+        data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "html",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            $("#categorias").append(data);
+            console.log(data);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
