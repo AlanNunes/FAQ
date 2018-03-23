@@ -41,12 +41,12 @@ class FAQ {
 		}
 	}
 
-	public function contribuirFAQ($categoria, $pergunta, $resposta, $nome, $email){
+	public function contribuirFAQ($categoria, $pergunta, $resposta){
 		$data = date('Y-m-d');
-		$sql = "INSERT INTO perguntas(perguntaConteudo, categoriaId, nome, email, data) VALUES ('$pergunta', '$categoria', '$nome', '$email', '$data')";
+		$sql = "INSERT INTO perguntas(perguntaConteudo, categoriaId, data) VALUES ('{$pergunta}', {$categoria}, '{$data}')";
 		if($this->conn->query($sql)){
 			$perguntaId = $this->conn->insert_id;
-			$sql = "INSERT INTO respostas (respostaConteudo, nome, email, data) VALUES ('$resposta', '$nome', '$email', '$data')";
+			$sql = "INSERT INTO respostas (respostaConteudo, nome) VALUES ('$resposta', '$data')";
 			if($this->conn->query($sql)){
 				$respostaId = $this->conn->insert_id;
 

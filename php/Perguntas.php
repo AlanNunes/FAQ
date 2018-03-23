@@ -34,8 +34,20 @@ class Perguntas {
 	}
 
 	public function listPerguntasSemRespostas(){
-		$sql = "SELECT * FROM perguntas WHERE respostaId IS NULL ORDER BY data";
+		$sql = "SELECT * FROM perguntas WHERE respostaId IS NULL OR categoriaId IS NULL ORDER BY data";
 		return $this->conn->query($sql);
+	}
+
+	public function adicionaResposta($categoriaId, $perguntaId, $resposta){
+		$sql = "INSERT INTO respostas (respostaConteudo) VALUES ('{$resposta}')";
+		if($this->conn->query($sql)){
+			$respostaId = $this->conn->insert_id;
+			$sql = "UPDATE perguntas SET respostaId = {$respostaId}, categoriaId = {$categoriaId} WHERE perguntaId = {$perguntaId}";
+			if($this->conn->query($sql)){
+				return array("erro" => false);
+			}
+		}
+		return array("erro" => true);
 	}
 
 }

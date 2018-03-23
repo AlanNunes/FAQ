@@ -40,10 +40,10 @@ if(!isset($_SESSION["id"])){
     <div class="conteudo" id="conteudo">
       <div class="row">
         <div class="col-6 col-md-4">
-          <button type="button" class="btn btn-light btn-block" data-toggle="modal" data-target="#contribuirFAQ" onclick="mostrarCategorias()"><span class="oi oi-plus"></span>  Perguntas</button>
+          <button type="button" class="btn btn-light btn-block" data-toggle="modal" data-target="#contribuirFAQ" onclick="mostrarCategorias('categorias')"><span class="oi oi-plus"></span>  Perguntas</button>
         </div>
         <div class="col-6 col-md-4">
-          <button type="button" class="btn btn-light btn-block"><span class="oi oi-plus"></span>  Categorias</button>
+          <button type="button" class="btn btn-light btn-block" data-toggle="modal" data-target="#categoriasFAQ" onclick="mostrarCategoriasInTable()"><span class="oi oi-plus"></span>  Categorias</button>
         </div>
         <div class="col-6 col-md-4">
           <a href="logout.php" class="btn btn-light btn-block"><span class="oi oi-account-logout"></span>  Sair</a>
@@ -63,20 +63,38 @@ if(!isset($_SESSION["id"])){
             </button>
           </div>
           <div class="modal-body">
-            <form>
-              <div id="contribuirAlert">aaa</div>
+            <form class="needs-validation" novalidate>
+              <div id="contribuirAlert"></div>
               <div class="form-group">
                 <label for="categorias">Selecione uma Categoria</label>
                 <select class="form-control" id="categorias">
                 </select>
+                <div class="valid-feedback">
+                  Categoria selecionada.
+                </div>
+                <div class="invalid-feedback">
+                  Selecione uma categoria.
+                </div>
               </div>
               <div class="form-group">
                 <label for="pergunta">Informe a Pergunta</label>
                 <textarea class="form-control" id="pergunta" rows="3"></textarea>
+                <div class="valid-feedback">
+                  Pergunta válida.
+                </div>
+                <div class="invalid-feedback">
+                  Pergunta inválida, deve conter no mínimo 10 caracteres.
+                </div>
               </div>
               <div class="form-group">
                 <label for="resposta">Informe a Resposta</label>
                 <textarea class="form-control" id="resposta" rows="3"></textarea>
+                <div class="valid-feedback">
+                  Resposta válida.
+                </div>
+                <div class="invalid-feedback">
+                  Resposta inválida, deve conter no mínimo 10 caracteres.
+                </div>
               </div>
           </div>
           <div class="modal-footer">
@@ -102,8 +120,94 @@ if(!isset($_SESSION["id"])){
             <p style="float: right">Equipe NEAD</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido !</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="modalAdicionaResposta" tabindex="-1" role="dialog" aria-labelledby="adicionarRespostaLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="adicionarRespostaLabel">Adicionar Resposta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div id="adicionaRespostaAlert"></div>
+              <div class="form-group">
+                <label for="addRespostaCategorias">Selecione uma Categoria</label>
+                <select class="form-control" id="addRespostaCategorias">
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="adicionaPergunta">Pergunta:</label>
+                <textarea class="form-control" id="adicionaPergunta" rows="3" disabled></textarea>
+              </div>
+              <div class="form-group">
+                <label for="adicionaResposta">Responda a pergunta:</label>
+                <textarea class="form-control" id="adicionaResposta" rows="3"></textarea>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="idPergunta" onclick="registraResposta(this.id)">Pronto !</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade bd-example-modal-lg" id="categoriasFAQ" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Categorias</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th scope="col">Criar/Editar</th>
+                  <th scope="col">Excluir</th>
+                </tr>
+              </thead>
+              <form class="needs-validation" novalidate>
+              <tbody id="categoriasEditContent">
+              </tbody>
+              </form>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Pronto</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="excluirCategoriaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">FAQ</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Tu desejas excluir esta categoria permanentemente ?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btn-excluirCategoria">Estou ciente</button>
           </div>
         </div>
       </div>
@@ -115,8 +219,55 @@ if(!isset($_SESSION["id"])){
     <script src="js/bootstrap.min.js"></script>
     <script>
     $(document).ready(function(){
-      listPerguntas();
+      setInterval(listPerguntas, 500);
     });
+
+    function showAdicionarResposta(perguntaId){
+      $("#modalAdicionaResposta").modal('show');
+      mostrarCategorias("addRespostaCategorias");
+      document.getElementById("idPergunta").id = perguntaId;
+      perguntaConteudo = $("#perguntaText"+perguntaId).val();
+      document.getElementById("adicionaPergunta").value = (perguntaConteudo);
+    }
+
+    function registraResposta(perguntaId){
+
+      var categoria = $("#addRespostaCategorias").val();
+      var resposta = $("#adicionaResposta").val();
+
+      var data = {
+          "process": "adicionaResposta",
+          "categoria": categoria,
+          "perguntaId": perguntaId,
+          "resposta": resposta
+        };
+        data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            console.log(data);
+            if(data.erro){
+              // Erro
+              if(data.categoriaErro){
+
+              }
+              if(data.perguntaErro){
+
+              }
+              if(data.respostaErro){
+
+              }
+            }else{
+              $("#adicionaRespostaAlert").html("");
+              $("#modalAdicionaResposta").modal("hide");
+              $("#contribuirSucesso").modal("show");
+            }
+          }
+        });
+    }
 
     function contribuirFAQ(){
       var categoria = $("#categorias").val();
@@ -132,19 +283,35 @@ if(!isset($_SESSION["id"])){
         data = $(this).serialize() + "&" + $.param(data);
         $.ajax({
           type: "POST",
-          dataType: "html",
+          dataType: "json",
           url: "php/Controll.php",
           data: data,
           success: function(data) {
             console.log(data);
-            if(data == -2){
+            if(data.erro){
               // Erro
-              alert('Erro desconhecido');
-            }else if(data == -1 ){
-              alert(data);
-              $("#contribuirAlert").html("<div class='alert alert-warning' role='alert>Preencha todos os campos.</div>");
+              if(data.categoriaErro){
+                $("#categorias").removeClass("is-valid");
+                $("#categorias").addClass("is-invalid");
+              }else{
+                $("#categorias").removeClass("is-invalid");
+                $("#categorias").addClass("is-valid");
+              }
+              if(data.perguntaErro){
+                $("#pergunta").removeClass("is-valid");
+                $("#pergunta").addClass("is-invalid");
+              }else{
+                $("#pergunta").removeClass("is-invalid");
+                $("#pergunta").addClass("is-valid");
+              }
+              if(data.respostaErro){
+                $("#resposta").removeClass("is-valid");
+                $("#resposta").addClass("is-invalid");
+              }else{
+                $("#resposta").removeClass("is-invalid");
+                $("#resposta").addClass("is-valid");
+              }
             }else{
-              alert(data);
               $("#contribuirAlert").html("");
               $("#contribuirFAQ").modal("hide");
               $("#contribuirSucesso").modal("show");
@@ -164,13 +331,12 @@ if(!isset($_SESSION["id"])){
           url: "php/Controll.php",
           data: data,
           success: function(data) {
-            console.log(data);
             $("#semResposta").html(data);
           }
         });
     }
 
-    function mostrarCategorias(){
+    function mostrarCategorias(div){
         var data = {
           "process": "mostrarCategorias"
         };
@@ -181,10 +347,105 @@ if(!isset($_SESSION["id"])){
           url: "php/Controll.php",
           data: data,
           success: function(data) {
-            $("#categorias").append(data);
+            $("#"+div).html(data);
           }
         });
-      }
+    }
+
+    function mostrarCategoriasInTable(){
+      var data = {
+          "process": "mostrarCategoriasInTable"
+        };
+        data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "html",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            $("#categoriasEditContent").html("<tr><td><input type='text' class='form-control' name='categoriaNome' id='categoriaNome'></td><td><button type='button' class='btn btn-primary btn-block' onclick='criarCategoria()'>Criar</button></td><td><button type='button' class='btn btn-secondary btn-block' disabled>Excluir</button></td></tr>");
+            $("#categoriasEditContent").append(data);
+          }
+        });
+    }
+
+    function criarCategoria(){
+      var nome = $("#categoriaNome").val();
+      var data = {
+        "process": "criarCategoria",
+        "nome": nome,
+      };
+      data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            if(data.erro){
+              $("#categoriaNome").removeClass("is-valid");
+              $("#categoriaNome").addClass("is-invalid");
+            }else{
+              $("#categoriaNome").removeClass("is-invalid");
+              $("#categoriaNome").addClass("is-valid");
+              mostrarCategoriasInTable();
+            }
+          }
+        });
+    }
+
+    function excluirCategoriaModal(id){
+      document.getElementById("btn-excluirCategoria").onclick = function() { excluirCategoria(id); }
+      $("#excluirCategoriaModal").modal("show");
+    }
+
+    function excluirCategoria(id){
+      var data = {
+        "process": "excluirCategoria",
+        "id": id,
+      };
+      data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "html",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            if(data.erro){
+              alert('erro desconhecido');
+            }else{
+              $("#excluirCategoriaModal").modal("hide");
+              mostrarCategoriasInTable();
+            }
+          }
+        });
+    }
+
+    function editCategoria(id){
+      var nome = $("#nome"+id).val();
+      var data = {
+        "process": "editCategoria",
+        "nome": nome,
+        "id": id
+      };
+      data = $(this).serialize() + "&" + $.param(data);
+        $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: "php/Controll.php",
+          data: data,
+          success: function(data) {
+            if(data.erro){
+              $("#nome"+id).removeClass("is-valid");
+              $("#nome"+id).addClass("is-invalid");
+            }else{
+              $("#nome"+id).removeClass("is-invalid");
+              $("#nome"+id).addClass("is-valid");
+              $("#excluirCategoriaModal").modal("hide");
+            }
+          }
+        });
+    }
     </script>
   </body>
 </html>

@@ -21,5 +21,28 @@ class Categorias {
 		}
 	}
 
+	public function criarCategoria($nome){
+		$sql = "INSERT INTO categorias (categoriaNome) VALUES ('{$nome}')";
+		$this->conn->query($sql);
+	}
+
+	public function editCategoria($id, $nome){
+		$sql = "UPDATE categorias SET categoriaNome = '{$nome}' WHERE categoriaId = {$id}";
+		if($this->conn->query($sql)){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
+	public function excluirCategoria($id){
+		$sql = "DELETE FROM categorias WHERE categoriaId = {$id}";
+		if($this->conn->query($sql)){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
 }
 ?>

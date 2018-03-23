@@ -37,51 +37,174 @@ if(isset($_POST["process"]) && !empty($_POST["process"])) {
 			contribuirFAQ();
 			break;
 
+		case 'adicionaResposta':
+			adicionaResposta();
+			break;
+
+		case 'mostrarCategoriasInTable':
+			mostrarCategoriasInTable();
+			break;
+
+		case 'criarCategoria':
+			criarCategoria();
+			break;
+
+		case 'editCategoria':
+			editCategoria();
+			break;
+
+		case 'excluirCategoria':
+			excluirCategoria();
+			break;
+
 		default:
 			echo "ERROR 404 - Process Not Found";
 			break;
 	}
 }
 
-// function sendMessage(){
-// 	$db = new DataBase();
-// 	$conn = $db->getConnection();
+function excluirCategoria(){
+	$erro = false;
+	if(empty($_POST["id"]) OR !isset($_POST["id"])){
+		$erro = true;
+	}
+	if($erro){
+		echo json_encode(array('erro' => true));
+	}else{
+		$db = new DataBase();
+		$conn = $db->getConnection();
 
-// 	$message = new Messages($conn);
-// 	$txt = safe_data($_POST["message"]);
-// 	// We need the original text to use it after
-// 	$message->setText($txt);
+		$id = safe_data($_POST["id"]);
+		$categoria = new Categorias($conn);
+		if($categoria->excluirCategoria($id)){
+			echo json_encode(array('erro' => false));
+		}else{
+			echo json_encode(array('erro' => true));
+		}
+	}
+}
 
-// 	$txt = $message->removeSpecialCharacters($txt);
-// 	$words = array();
-// 	$words = $message->explodeString($txt);
-// 	$responseAnswer = $message->findAnswer($words);
-// 	echo $responseAnswer;
-// }
+function editCategoria(){
+	if(empty($_POST["nome"]) OR !isset($_POST["nome"]) OR empty($_POST["id"]) OR !isset($_POST["id"])){
+		echo json_encode(array('erro' => true));
+	}else{
+		$db = new DataBase();
+		$conn = $db->getConnection();
+
+		$nome = safe_data($_POST["nome"]);
+		$id = safe_data($_POST["id"]);
+		$categoria = new Categorias($conn);
+		if($categoria->editCategoria($id, $nome)){
+			echo json_encode(array('erro' => false));
+		}else{
+			echo json_encode(array('erro' => true));
+		}
+	}
+}
+
+function criarCategoria(){
+	$erro = false;
+	if(empty($_POST["nome"]) OR !isset($_POST["nome"])){
+		$erro = true;
+	}
+	if($erro){
+		echo json_encode(array("erro" => true));
+	}else{
+		$db = new DataBase();
+		$conn = $db->getConnection();
+
+		$nome = safe_data($_POST["nome"]);
+		$categoria = new Categorias($conn);
+		$categoria->criarCategoria($nome);
+		echo json_encode(array("erro" => false));
+	}
+}
+
+function mostrarCategoriasInTable(){
+	$db = new DataBase();
+	$conn = $db->getConnection();
+
+	$categoria = new Categorias($conn);
+	$response = $categoria->getCategorias();
+
+	if(!$response["erro"]){
+		foreach($response["categorias"] as $categoria){
+			echo "<tr>";
+			echo "<td><input type='text' class='form-control' id='nome".$categoria["categoriaId"]."' value='".$categoria["categoriaNome"]."'></td>";
+			echo "<td><button class='btn btn-primary btn-block' onclick='editCategoria(this.id)'>Salvar</button></td>";
+			echo "<td><button class='btn btn-secondary btn-block' onclick='excluirCategoriaModal(".$categoria["categoriaId"].")'>Excluir</button></td>";
+			echo "</tr>";
+		}
+	}
+
+	
+}
+
+function adicionaResposta(){
+	$erro = $categoriaErro = $perguntaErro = $respostaErro = false;
+	if(empty($_POST["categoria"]) OR !isset($_POST["categoria"])){
+		$erro = true;
+		$categoriaErro = true;
+	}
+	if(empty($_POST["perguntaId"]) OR !isset($_POST["perguntaId"])){
+		$erro = true;
+		$perguntaErro = true;
+	}
+	if(empty($_POST["resposta"]) OR !isset($_POST["resposta"])){
+		$erro = true;
+		$respostaErro = true;
+	}
+	if($erro){
+		$response = array("erro" => true, "categoriaErro" => $categoriaErro, "perguntaErro" => $perguntaErro, "respostaErro" => $respostaErro);
+		echo json_encode($response);
+	}else{
+		$categoria = safe_data($_POST["categoria"]);
+		$perguntaId = safe_data($_POST["perguntaId"]);
+		$resposta = safe_data($_POST["resposta"]);
+
+		$db = new DataBase();
+		$conn = $db->getConnection();
+
+		$pergunta = new Perguntas($conn);
+		$response = $pergunta->adicionaResposta($categoria, $perguntaId, $resposta);
+
+		echo json_encode($response);
+	}
+}
 
 function contribuirFAQ(){
-	if(!empty($_POST["categoria"]) && isset($_POST["categoria"]) && !empty($_POST["pergunta"]) && isset($_POST["pergunta"]) && !empty($_POST["resposta"]) && isset($_POST["resposta"])){
+	$erro = $categoriaErro = $perguntaErro = $respostaErro = false;
+
+	if(empty($_POST["categoria"]) OR !isset($_POST["categoria"])){
+		$erro = $categoriaErro = true;
+	}
+	if(empty($_POST["pergunta"]) OR !isset($_POST["pergunta"]) OR strlen($_POST["pergunta"]) < 10){
+		$erro = $perguntaErro = true;
+	}
+	if(empty($_POST["resposta"]) OR !isset($_POST["resposta"]) OR strlen($_POST["resposta"]) < 10){
+		$erro = $respostaErro = true;
+	}
+
+	if(!$erro){
 		$categoria = safe_data($_POST["categoria"]);
 		$pergunta = safe_data($_POST["pergunta"]);
 		$resposta = safe_data($_POST["resposta"]);
-		$nome = safe_data($_SESSION["nome"]);
-		$email = safe_data($_SESSION["email"]);
 
 		$db = new DataBase();
 		$conn = $db->getConnection();
 
 		$faq = new FAQ($conn);
-		$response = $faq->contribuirFAQ($categoria, $pergunta, $resposta, $nome, $email);
+		$response = $faq->contribuirFAQ($categoria, $pergunta, $resposta);
 		if($response == -1){
 			// Erro Interno
-			echo -2;
+			echo json_encode(array("erro" => true, "categoriaErro" => $categoriaErro, "perguntaErro" => $perguntaErro, "respostaErro" => $respostaErro));
 		}else{
 			// Success
-			echo $response;
+			echo json_encode(array("erro" => false, "categoriaErro" => $categoriaErro, "perguntaErro" => $perguntaErro, "respostaErro" => $respostaErro));
 		}
 	}else{
 		// Erro, não preencheu os dados
-		echo -1;
+		echo json_encode(array("erro" => true, "categoriaErro" => $categoriaErro, "perguntaErro" => $perguntaErro, "respostaErro" => $respostaErro));
 	}
 }
 
@@ -92,7 +215,8 @@ function listPerguntas(){
 	$pergunta = new Perguntas($conn);
 	$response = $pergunta->listPerguntasSemRespostas();
 
-	while($row = $response->fetch_assoc()){
+	if($response->num_rows > 0){
+		while($row = $response->fetch_assoc()){
 		echo "<p><div class='card text-center'>
 				  <div class='card-header'>
 				    ".$row["nome"]."/".$row["email"]."
@@ -100,13 +224,23 @@ function listPerguntas(){
 				  <div class='card-body'>
 				    <h5 class='card-title'>Pergunta:</h5>
 				    <p class='card-text'>".$row["perguntaConteudo"]."</p>
-				    <a href='#' class='btn btn-primary'>Adicionar Resposta</a>
+				    <input type='hidden' id='perguntaText".$row["perguntaId"]."' value='".$row["perguntaConteudo"]."'>
+				    <a href='#' class='btn btn-primary' id='".$row["perguntaId"]."' onclick='showAdicionarResposta(this.id)'>Adicionar Resposta</a>
 				  </div>
 				  <div class='card-footer text-muted'>
 				    ".date('d/m/Y', strtotime(str_replace('-','/', $row["data"])))."
 				  </div>
 				</div></p>";
+		}
+	}else{
+		echo "<br/><br/><div class='alert alert-success' role='alert'>
+			  <h4 class='alert-heading'>Ótimo Trabalho NEAD!</h4>
+			  <p>Nenhuma pergunta sem resposta foi encontrada. Aproveite e adicione novas perguntas :)</p>
+			  <hr>
+			  <p class='mb-0'>Esta mensagem significa que o NEAD trabalha duro pelos alunos.</p>
+			</div>";
 	}
+	
 }
 
 function registrarPergunta(){
