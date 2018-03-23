@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once('DataBase.php');
 require_once('Messages.php');
 require_once('Categorias.php');
@@ -76,7 +77,7 @@ function contribuirFAQ(){
 			echo -2;
 		}else{
 			// Success
-			echo 1;
+			echo $response;
 		}
 	}else{
 		// Erro, não preencheu os dados

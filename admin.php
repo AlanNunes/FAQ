@@ -144,6 +144,7 @@ if(!isset($_SESSION["id"])){
               alert(data);
               $("#contribuirAlert").html("<div class='alert alert-warning' role='alert>Preencha todos os campos.</div>");
             }else{
+              alert(data);
               $("#contribuirAlert").html("");
               $("#contribuirFAQ").modal("hide");
               $("#contribuirSucesso").modal("show");
