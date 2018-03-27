@@ -115,8 +115,11 @@ function criarCategoria(){
 
 		$nome = safe_data($_POST["nome"]);
 		$categoria = new Categorias($conn);
-		$categoria->criarCategoria($nome);
-		echo json_encode(array("erro" => false));
+		if(!$categoria->criarCategoria($nome)){
+			echo json_encode(array("erro" => false));
+		}else{
+			echo json_encode(array("erro" => true));
+		}
 	}
 }
 
@@ -131,7 +134,7 @@ function mostrarCategoriasInTable(){
 		foreach($response["categorias"] as $categoria){
 			echo "<tr>";
 			echo "<td><input type='text' class='form-control' id='nome".$categoria["categoriaId"]."' value='".$categoria["categoriaNome"]."'></td>";
-			echo "<td><button class='btn btn-primary btn-block' onclick='editCategoria(this.id)'>Salvar</button></td>";
+			echo "<td><button class='btn btn-primary btn-block' onclick='editCategoria(".$categoria["categoriaId"].")'>Salvar</button></td>";
 			echo "<td><button class='btn btn-secondary btn-block' onclick='excluirCategoriaModal(".$categoria["categoriaId"].")'>Excluir</button></td>";
 			echo "</tr>";
 		}
@@ -225,7 +228,7 @@ function listPerguntas(){
 				    <h5 class='card-title'>Pergunta:</h5>
 				    <p class='card-text'>".$row["perguntaConteudo"]."</p>
 				    <input type='hidden' id='perguntaText".$row["perguntaId"]."' value='".$row["perguntaConteudo"]."'>
-				    <a href='#' class='btn btn-primary' id='".$row["perguntaId"]."' onclick='showAdicionarResposta(this.id)'>Adicionar Resposta</a>
+				    <a href='#' class='btn btn-primary' onclick='showAdicionarResposta(".$row["perguntaId"].")'>Adicionar Resposta</a>
 				  </div>
 				  <div class='card-footer text-muted'>
 				    ".date('d/m/Y', strtotime(str_replace('-','/', $row["data"])))."

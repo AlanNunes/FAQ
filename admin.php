@@ -117,6 +117,7 @@ if(!isset($_SESSION["id"])){
           </div>
           <div class="modal-body">
             Sua contribuição foi registrada com sucesso.
+            <br/>
             <p style="float: right">Equipe NEAD</p>
           </div>
           <div class="modal-footer">
@@ -152,10 +153,11 @@ if(!isset($_SESSION["id"])){
                 <label for="adicionaResposta">Responda a pergunta:</label>
                 <textarea class="form-control" id="adicionaResposta" rows="3"></textarea>
               </div>
+              <input type="hidden" id="idPergunta">
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-            <button type="button" class="btn btn-primary" id="idPergunta" onclick="registraResposta(this.id)">Pronto !</button>
+            <button type="button" class="btn btn-primary" onclick="registraResposta()">Pronto !</button>
           </div>
         </div>
       </div>
@@ -213,6 +215,25 @@ if(!isset($_SESSION["id"])){
       </div>
     </div>
 
+    <div class="modal fade" id="erroCategoriaEstaSendoUsada" tabindex="-1" role="dialog" aria-labelledby="erroCategoriaEstaSendoUsadaLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="erroCategoriaEstaSendoUsadaLabel">FAQ</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Esta categoria não pode ser excluída pois já está em uso.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">Entendi !</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </center>
     <script src="js/jquery.min.js"></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
@@ -225,13 +246,13 @@ if(!isset($_SESSION["id"])){
     function showAdicionarResposta(perguntaId){
       $("#modalAdicionaResposta").modal('show');
       mostrarCategorias("addRespostaCategorias");
-      document.getElementById("idPergunta").id = perguntaId;
+      document.getElementById("idPergunta").value = perguntaId;
       perguntaConteudo = $("#perguntaText"+perguntaId).val();
       document.getElementById("adicionaPergunta").value = (perguntaConteudo);
     }
 
-    function registraResposta(perguntaId){
-
+    function registraResposta(){
+      var perguntaId = $("#idPergunta").val();
       var categoria = $("#addRespostaCategorias").val();
       var resposta = $("#adicionaResposta").val();
 
@@ -252,13 +273,25 @@ if(!isset($_SESSION["id"])){
             if(data.erro){
               // Erro
               if(data.categoriaErro){
-
+                $("#addRespostaCategorias").removeClass("is-valid");
+                $("#addRespostaCategorias").addClass("is-invalid");
+              }else{
+                $("#addRespostaCategorias").removeClass("is-invalid");
+                $("#addRespostaCategorias").addClass("is-valid");
               }
               if(data.perguntaErro){
-
+                $("#adicionaPergunta").removeClass("is-valid");
+                $("#adicionaPergunta").addClass("is-invalid");
+              }else{
+                $("#adicionaPergunta").removeClass("is-invalid");
+                $("#adicionaPergunta").addClass("is-valid");
               }
               if(data.respostaErro){
-
+                $("#adicionaResposta").removeClass("is-valid");
+                $("#adicionaResposta").addClass("is-invalid");
+              }else{
+                $("#adicionaResposta").removeClass("is-invalid");
+                $("#adicionaResposta").addClass("is-valid");
               }
             }else{
               $("#adicionaRespostaAlert").html("");
@@ -407,12 +440,15 @@ if(!isset($_SESSION["id"])){
       data = $(this).serialize() + "&" + $.param(data);
         $.ajax({
           type: "POST",
-          dataType: "html",
+          dataType: "json",
           url: "php/Controll.php",
           data: data,
           success: function(data) {
+            console.log(data);
             if(data.erro){
-              alert('erro desconhecido');
+              $("#nome"+id).addClass("is-invalid");
+              $("#excluirCategoriaModal").modal("hide");
+              $("#erroCategoriaEstaSendoUsada").modal("show");
             }else{
               $("#excluirCategoriaModal").modal("hide");
               mostrarCategoriasInTable();

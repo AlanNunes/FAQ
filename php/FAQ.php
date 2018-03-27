@@ -15,7 +15,7 @@ class FAQ {
 	}
 
 	public function buscaFAQ(){
-		$sql = "SELECT perguntaId, perguntaConteudo, categoriaId, perguntas.respostaId as respostaId, respostaConteudo FROM perguntas INNER JOIN respostas ON perguntas.respostaId = respostas.respostaId AND categoriaId = '$this->categoriaId'";
+		$sql = "SELECT perguntaId, perguntaConteudo, categoriaId, perguntas.respostaId as respostaId, respostaConteudo FROM perguntas INNER JOIN respostas ON perguntas.respostaId = respostas.respostaId AND categoriaId = '$this->categoriaId' ORDER BY perguntas.data DESC";
 		$response = $this->conn->query($sql);
 		if($response->num_rows > 0){
 			while($row = $response->fetch_assoc()){
